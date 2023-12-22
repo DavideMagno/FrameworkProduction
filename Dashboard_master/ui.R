@@ -1,0 +1,349 @@
+library(shiny)
+library(bslib)
+library(shinyjs)
+library(shinycssloaders)
+library(shinyWidgets)
+library(plotly)
+library(glue)
+library(shinybusy)
+library(openxlsx)
+
+page_sidebar(
+  theme = bs_theme(bootswatch = "superhero",
+                   font_scale = 0.9,
+                   version = 5),
+  title = "Framework Dashboard - Hedge Analytics Ltd",
+  sidebar = sidebar(width = "300px",
+                    open = "desktop",
+                    conditionalPanel(
+                      "false", # always hide the download button
+                      downloadButton("downloadData")
+                    ),
+                    div(
+                      id = "show-sidebar-content",
+                      pickerInput(inputId = "asset_manager",
+                                  label = "Select the Index Universe",
+                                  selected = "Rolled Futures",
+                                  choices = asset_manager_choices,
+                                  multiple = FALSE,
+                                  choicesOpt = list(
+                                    style = rep("color: black;", length(asset_manager_choices)))),
+                      numericInput(inputId = "factors_chosen", 
+                                   label = "Choose the number of principal components",
+                                   value = 4,
+                                   min = 3,
+                                   max = 4),
+                      uiOutput('date.selection'),
+                      conditionalPanel(
+                        condition = "input.main_panel === 'Relative Value'",
+                        actionButton("final_report", "Download report for all the indices",
+                                     icon("download"),
+                                     style = "margin-top:15px; margin-bottom:15px;"),
+                        
+                      )
+                    ) |> 
+                      shinyjs::hidden()
+                    
+  ),
+  tagList(
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "appstyle.css")
+    ),
+    useShinyjs(),
+    # div(class = "pull-right", shinyauthr::logoutUI(id = "logout")),
+    # add login panel UI function
+    shinyauthr::loginUI(id = "login"),
+    # setup table output to show user info after login
+    div(
+      id = "show-page-content",
+      navset_tab(
+        id = "main_panel",
+        nav_panel(
+          title = "Indices summary",
+          value = "homepage",
+          card(
+            full_screen = FALSE,
+            card_header("Table of assets in the universe and fair value estimation"),
+            height = "500px",
+            card_body(
+              DT::DTOutput("landing_table")
+            )
+          ),
+          card(
+            full_screen = TRUE,
+            card_header("Market, fair value estimation and eigendata plots"),
+            # column(12, DT::DTOutput("landing_table"),
+            #        style = "height:500px; overflow-y: scroll;")),
+            highcharter::highchartOutput("index_and_eigendata", height = "1000px")
+            # style = "resize:vertical;"
+            # fluidRow(column(12, highcharter::highchartOutput("index_and_eigendata",
+            #                                                  height = "750px")))
+            # )
+          )),
+        nav_panel(
+          "Self-hedging Portfolios",
+          card( 
+            layout_columns(
+              col_widths = c(2, 10),
+              card(
+                card_header("Control panel for self hedging portfolios"),
+                card_body(
+                  class = "text-align: center",
+                  numericInput(inputId = "threshold", 
+                               label = "Input the threshold of significance for the factors:",
+                               value = 0.8,
+                               min = 0.05,
+                               max = 1,
+                               step = 0.05),
+                  uiOutput('dates')
+                )
+              ),
+              uiOutput('select.portfolios')
+            )
+          ),
+          uiOutput('return.analysis')
+        ),
+        nav_panel(
+          "Relative Value",
+          useShinyjs(),
+          div(id='bigbox',
+              uiOutput('control_centre_relative_value')
+          ),
+          fluidRow(
+            column(2, offset = 1, h5("Estimated Fair Value"), 
+                   wellPanel (
+                     div(textOutput("model.value"),style = "font-size:150%"),
+                     style="padding: 15px;padding-top: 0px;padding-bottom: 0px;margin-top: 0px;"
+                   ), align = 'center', style="margin-top: 0px;"),
+            column(2, h5("Trading level"), 
+                   wellPanel (
+                     div(textOutput("status.trade"),style = "font-size:150%"),
+                     style="padding: 15px;padding-top: 0px;padding-bottom: 0px;margin-top: 0px;"
+                   ), align = 'center', style="margin-top: 0px;"),
+            column(2, h5("Gap to index (z-score)"),
+                   wellPanel (
+                     div(textOutput("zscore"),style = "font-size:150%"),
+                     style="padding: 15px;padding-top: 0px;padding-bottom: 0px;margin-top: 0px;"
+                   ), align = 'center', style="margin-top: 0px;"),
+            column(2, h5("% of Bets won"),
+                   wellPanel (
+                     div(textOutput("bet.won"),style = "font-size:150%"),
+                     style="padding: 15px;padding-top: 0px;padding-bottom: 0px;margin-top: 0px;"
+                   ), align = 'center', style="margin-top: 0px;"),
+            column(2, h5("Kelly Score"),
+                   wellPanel (
+                     div(textOutput("kelly_criteria"),style = "font-size:150%"),
+                     style="padding: 15px;padding-top: 0px;padding-bottom: 0px;margin-top: 0px;"
+                   ), align = 'center', style="margin-top: 0px;")
+          ),
+          br(),
+          layout_columns(
+            width = 1/2,
+            card(
+              full_screen = TRUE,
+              card_header("Index and Fair Value Estimation Corridor"),
+              highcharter::highchartOutput("graph_distance_FALSE")
+            ),
+            card(
+              full_screen = TRUE,
+              card_header("Normalised distance between the index and the center of the Fair Value Estimation Corridor"),
+              highcharter::highchartOutput("graph_distance_TRUE")
+            )
+          ),
+          br(),
+          layout_columns(
+            card(
+              full_screen = TRUE,
+              card_header("Performance of the Relative Trading Strategy (vs Long Only)"),
+              highcharter::highchartOutput("graph_pnl_relative")
+            ),
+            card(
+              full_screen = TRUE,
+              card_header("Risk Return analysis of the Relative Trading Strategy (vs Long Only)"),
+              DT::DTOutput("table.relative.value")
+            )
+          ),
+          br(),
+          layout_columns(
+            width = 1/3,
+            card(
+              full_screen = TRUE,
+              card_header("Distribution of the Relative Trading Strategy Daily returns"),
+              highcharter::highchartOutput("distribution_returns")
+            ),
+            card(
+              full_screen = TRUE,
+              card_header("% of trade bets won/lost"),
+              highcharter::highchartOutput("betting_results")
+            ),
+            card(
+              full_screen = TRUE,
+              card_header("Cumulative distribution of the trades' duration"),
+              highcharter::highchartOutput("duration_results")
+            )
+          )
+        ),
+        # nav_panel("Trading",
+        #           fluidRow(
+        #             column(6,
+        #                    uiOutput('current_trading_portfolio')),
+        #             column(6,
+        #                    uiOutput('long_box'))
+        #           ),
+        #           fluidRow(
+        #             column(12,
+        #                    uiOutput('portfolio_rebalanced'))
+        #           )
+        #           
+        # ),
+        nav_panel("Pairs Trading",
+                  fluidRow(
+                    column(9, 
+                           div(id='bigbox',
+                               fluidRow(
+                                 column(3,style = "margin-top:12px;",align = "center", switchInput(
+                                   inputId = "confidence_switch",
+                                   label = "Include only high confidence FVEs", 
+                                   labelWidth = "400px",
+                                   width = "400px",
+                                   onLabel = "YES",
+                                   offLabel = "NO"
+                                 )),
+                                 column(3,style = "margin-top:12px;",align = "center", switchInput(
+                                   inputId = "tradable_switch",
+                                   label = "Include only tradable indices", 
+                                   labelWidth = "400px",
+                                   width = "400px",
+                                   onLabel = "YES",
+                                   offLabel = "NO"
+                                 )),
+                                 column(3, align = "center", numericInput(inputId = "tails_cutoff",
+                                                                          label = "Trade stability parameter (the higher, the more stable the asset allocation)",
+                                                                          value = 0,
+                                                                          min = 0,
+                                                                          max = 5,
+                                                                          step = 1)),
+                                 column(3, downloadButton("pairs_report", "Download the pairs trading report",
+                                                          style = "margin-top:30px;"))
+                               )
+                           )),
+                    column(3, align = "center", style = "margin-top:20px;",
+                           h5("Current pair to trade"),
+                           wellPanel (
+                             div(textOutput("current_pair"),style = "font-size:150%"),
+                             style="padding: 35px;padding-top: 0px;padding-bottom: 0px;margin-top: 0px;"
+                           ))
+                  ),
+                  layout_columns(
+                    width = 1/2,
+                    card(
+                      full_screen = TRUE,
+                      card_header("Pairs traded historically"),
+                      highcharter::highchartOutput("pairs_trading_graph")
+                    ),
+                    layout_columns(
+                      width = 1/2,
+                      card(
+                        full_screen = TRUE,
+                        card_header("Pairs traded for portfolio"),
+                        highcharter::highchartOutput("pairs_trading_heatmap")
+                      )
+                    )
+                  ),
+                  br(),
+                  layout_columns(
+                    width = 1/2,
+                    card(
+                      full_screen = TRUE,
+                      card_header("Performance of the strategy"),
+                      highcharter::highchartOutput("pairs_trading_performance")
+                    ),
+                    card(
+                      full_screen = TRUE,
+                      card_header("Risk Return analysis of the Relative Trading Strategy (vs Long Only)"),
+                      DT::DTOutput("table_pairs")
+                    )
+                  ),
+                  br(),
+                  layout_columns(
+                    width = 1/3,
+                    card(
+                      full_screen = TRUE,
+                      card_header("Distribution of the Relative Trading Strategy Daily returns"),
+                      highcharter::highchartOutput("distribution_returns_pairs")
+                    ),
+                    card(
+                      full_screen = TRUE,
+                      card_header("% of trade bets won/lost/mixed"),
+                      highcharter::highchartOutput("betting_results_pairs")
+                    ),
+                    card(
+                      full_screen = TRUE,
+                      card_header("Cumulative distribution of the trades' duration"),
+                      highcharter::highchartOutput("duration_results_pairs")
+                    )
+                  )
+        ),
+        nav_panel(
+          "Hedging/Replication",
+          div(id='bigbox',
+              fluidRow(
+                column(4,  align = "center", uiOutput('hedging.asset')),
+                column(2, align = "center", uiOutput('dates_hedging')),
+                column(2, align = "center", numericInput(inputId = "max_weight",
+                                                         label = "Input the maximum weight per index:",
+                                                         value = 0.5,
+                                                         min = 0,
+                                                         max = 1,
+                                                         step = 0.1)),
+                column(2, align = "center", pickerInput(inputId = "dropdown_method",
+                                                        label = "Choose the methodology:",
+                                                        selected = "Empirical Tracking Error",
+                                                        choices = c("Empirical Tracking Error" = "ete", "Downside Risk" = "dr"),
+                                                        multiple = FALSE)),
+                column(2,align = "center", switchInput(
+                  inputId = "use.shorts",
+                  label = "Allow short selling", 
+                  labelWidth = "250px",
+                  width = "250px"
+                )
+                )
+              )
+          ),
+          layout_columns(
+            width = 1/2,
+            card(
+              full_screen = TRUE,
+              card_header("Replication Weights"),
+              highcharter::highchartOutput("hedging_weights")
+            ),
+            card(
+              full_screen = TRUE,
+              card_header("Replication Efficiency"),
+              card_body(
+                class = "align-items-center",
+                DT::DTOutput("risk.table"),
+                textOutput("hedge.efficiency")
+              )
+            )
+          ),
+          br(),
+          layout_columns(
+            width = 1/2,
+            card(
+              full_screen = TRUE,
+              card_header("Performance and drowdown over Training Range"),
+              highcharter::highchartOutput("hedging_training")
+            ),
+            card(
+              full_screen = TRUE,
+              card_header("Performance and drowdown over Testing Range"),
+              highcharter::highchartOutput("hedging_testing")
+            )
+          )
+        )
+      )
+    ) |> 
+      shinyjs::hidden()
+  )
+)

@@ -1,0 +1,16 @@
+
+#bigbox {
+  color:#ffffff;
+  background-color:#4a5a67;
+  padding:10px;
+  border-radius: 10px;
+  margin:10px
+}
+
+.bootstrap-switch {
+  margin-top: 15px; 
+}
+
+.progressbar-text {
+  color = #ffffff;
+}

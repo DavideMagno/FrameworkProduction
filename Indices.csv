@@ -1,0 +1,33 @@
+"Index","Source","Index_CSV","invariant","Type","Currency","Asset Class","Long Name","Starting Date","Taboo"
+"DJI.INDX","EODHD","DJI Index","Log","Tradable","USD","Equity","Dow Jones Industrial Average",2000-01-04,FALSE
+"GSPC.INDX","EODHD","S&P500","Log","Tradable","USD","Equity","S&P 500 Index",2000-01-04,FALSE
+"IXIC.INDX","EODHD","CCMP","Log","Tradable","USD","Equity","NASDAQ Composite",2000-01-04,FALSE
+"VIX.INDX","EODHD","VIX","Additive","Market","USD","Equity","CBOE Volatility Index",2000-01-04,FALSE
+"SKEW.INDX","EODHD","Skew Index","Log","Market","USD","Equity","CBOE SKEW Index",2000-01-04,FALSE
+"SX5E.INDX","EODHD","SX5E Index","Log","Tradable","EUR","Equity","EuroStoxx 50 Index",2000-01-04,FALSE
+"UKX.INDX","YAHOO","UKX Index","Log","Tradable","GBP","Equity","FTSE 100 Index (UK)",2000-01-04,FALSE
+"N225.INDX","EODHD","NKY Index","Log","Tradable","JPY","Equity","Nikkei 225",2000-01-04,FALSE
+"XUTD.LSE","EODHD","TY1","Log","Tradable","USD","Bond","Xtrackers II US Treasuries UCITS ETF 1D",2000-01-04,FALSE
+"XJSE.SW","EODHD","JB1","Log","Tradable","JPY","Bond","Xtrackers II Japan Government Bond UCITS ETF 1C",2000-01-04,FALSE
+"IS0L.XETRA","EODHD","RX1","Log","Tradable","EUR","Bond","iShares Germany Govt Bond UCITS ETF EUR (Dist)",2000-01-04,FALSE
+"AAA10Y","FREDR","AAA10y","Additive","Market",NA,"Bond","Moody's Seasoned Aaa Corporate Bond Yield Relative to Yield on 10-Year Treasury Constant Maturity",2000-01-04,TRUE
+"T5YIFR","FREDR","USGG5Y5Y Index","Additive","Market",NA,"Bond","5-Year, 5-Year Forward Inflation Expectation Rate",2000-01-04,FALSE
+"T10Y2Y","FREDR","US2s10s_swap","Additive","Market",NA,"Bond","10-Year Treasury Constant Maturity Minus 2-Year Treasury Constant Maturity",2000-01-04,FALSE
+"MOVE.INDX","EODHD","USSN0110 Curncy","Log","Market","USD","Bond","ICE BofAML MOVE Index",2000-01-04,FALSE
+"CL.COMM","EODHD","CL1 Comdty","Log","Tradable","USD","Commodities","Crude Oil",2000-01-04,FALSE
+"XAUUSD.FOREX","EODHD","XAU Curncy","Log","Tradable",NA,"Commodities","Gold Spot US Dollar",2000-01-04,FALSE
+"HG.COMM","EODHD","HG1 Comdty","Log","Tradable","USD","Commodities","Copper",2000-01-04,FALSE
+"NG.COMM","EODHD","NG1 Comdty","Log","Tradable","USD","Commodities","Natural Gas (CME)",2000-01-04,FALSE
+"KC.COMM","EODHD","KC1 Comdty","Log","Tradable","USD","Commodities","Coffee",2000-01-04,FALSE
+"ZC.COMM","EODHD","BCOM Index","Log","Tradable","USD","Commodities","Corn (CME)",2000-07-17,FALSE
+"AUDUSD.FOREX","EODHD","AUD Curncy","Log","Tradable",NA,"FX","Australian Dollar/US Dollar FX Spot Rate",2000-01-04,FALSE
+"CADUSD.FOREX","EODHD","CAD Curncy","Log","Tradable",NA,"FX","CADUSD",2000-01-04,FALSE
+"CHFUSD.FOREX","EODHD","CHF Curncy","Log","Tradable",NA,"FX","CHFUSD",2000-01-04,FALSE
+"CNYUSD.FOREX","EODHD","CNY Curncy","Log","Tradable",NA,"FX","Chinese Renminbi/US Dollar FX Cross Rate",2000-01-04,FALSE
+"EURUSD.FOREX","EODHD","EUR Curncy","Log","Tradable",NA,"FX","EURUSD",2000-01-04,FALSE
+"GBPUSD.FOREX","EODHD","GBP Curncy","Log","Tradable",NA,"FX","UK Pound Sterling/US Dollar FX Spot Rate",2000-01-04,FALSE
+"JPYUSD.FOREX","EODHD","JPY Curncy","Log","Tradable",NA,"FX","Japanese Yen/US Dollar FX Cross Rate",2000-01-04,FALSE
+"IUSP.SW","EODHD",NA,"Log","Tradable","USD","Real Estate","iShares US Property Yield UCITS ETF",2007-04-24,FALSE
+"IUKP.LSE","EODHD",NA,"Log","Tradable","GBP","Real Estate","iShares UK Property UCITS",2007-03-20,FALSE
+"IPRP.LSE","EODHD",NA,"Log","Tradable","GBP","Real Estate","iShares European Property Yield UCITS",2005-11-08,FALSE
+"BTC-USD.CC","EODHD",NA,"Log","Market","USD","Crypto","Bitcoin",2010-07-19,FALSE
